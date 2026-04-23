@@ -432,7 +432,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f3f1ed',
+    backgroundColor: '#f0eef3',
   },
   content: {
     flex: 1,
@@ -441,7 +441,7 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 34,
     fontWeight: '900',
-    color: '#111',
+    color: '#1805a6',
     marginBottom: 20,
   },
   title: {
@@ -505,29 +505,33 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   rowBetween: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'stretch',
     marginBottom: 14,
   },
   actionButton: {
-    flex: 1,
-    paddingVertical: 16,
+    flex: 5,
+    paddingVertical: 25,
     borderRadius: 16,
     borderWidth: 3,
-    borderColor: '#111',
+    
+    borderColor: '#087985',
     alignItems: 'center',
   },
   smallButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    alignSelf: 'center',
+    minWidth: 480,
+    paddingVertical: 62,
+    paddingHorizontal: 75,
     borderRadius: 16,
     borderWidth: 3,
-    borderColor: '#111',
+    borderColor: '#d30d1e',
     alignItems: 'center',
+    fontSize: 45,
   },
   greenButton: {
-    backgroundColor: '#bfe7d3',
+    backgroundColor: '#dbf269',
   },
   redButton: {
     backgroundColor: '#f3c7c0',

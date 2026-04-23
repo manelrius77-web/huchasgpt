@@ -1,0 +1,24 @@
+workflows:
+  expo-web-build:
+    name: MisHuchas Web Check
+    max_build_duration: 30
+    instance_type: mac_mini_m1
+
+    environment:
+      node: 20
+
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm install
+
+      - name: Check project
+        script: |
+          npx expo-doctor || true
+
+      - name: Export web build
+        script: |
+          npx expo export --platform web
+
+    artifacts:
+      - dist/**

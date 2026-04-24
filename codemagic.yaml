@@ -58,7 +58,7 @@ workflows:
             <key>provisioningProfiles</key>
             <dict>
               <key>com.manelrius.mishuchas</key>
-              <string>huchas_distribucion</string>
+              <string>[expo] com.manelrius.mishuchas AppStore 2026-04-23T22:47:42.109Z</string>
             </dict>
             <key>teamID</key>
             <string>W27J7P3Z8R</string>
@@ -76,23 +76,10 @@ workflows:
 
       - name: Build iOS
         script: |
-          xcodebuild \
-            -workspace ios/MisHuchas.xcworkspace \
-            -scheme MisHuchas \
-            -configuration Release \
-            -archivePath build/ios/xcarchive/MisHuchas.xcarchive \
-            archive \
-            COMPILER_INDEX_STORE_ENABLE=NO \
-            CODE_SIGN_STYLE=Manual \
-            DEVELOPMENT_TEAM=W27J7P3Z8R \
-            PRODUCT_BUNDLE_IDENTIFIER=com.manelrius.mishuchas \
-            PROVISIONING_PROFILE_SPECIFIER=huchas_distribucion
-
-          xcodebuild \
-            -exportArchive \
-            -archivePath build/ios/xcarchive/MisHuchas.xcarchive \
-            -exportPath build/ios/ipa \
-            -exportOptionsPlist /Users/builder/export_options.plist
+          xcode-project build-ipa \
+            --workspace ios/MisHuchas.xcworkspace \
+            --scheme MisHuchas \
+            --export-options-plist /Users/builder/export_options.plist
 
     artifacts:
       - build/ios/ipa/*.ipa

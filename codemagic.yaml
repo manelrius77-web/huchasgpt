@@ -28,7 +28,7 @@ workflows:
       cocoapods: default
       ios_signing:
         provisioning_profiles:
-          - huchas_distribucion
+          - pol
 
     scripts:
       - name: Install dependencies

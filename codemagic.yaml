@@ -3,6 +3,8 @@ workflows:
     name: MisHuchas Web Check
     max_build_duration: 30
     instance_type: mac_mini_m2
+    environment:
+      node: 20
     scripts:
       - name: Install dependencies
         script: |
@@ -28,17 +30,39 @@ workflows:
       - name: Install dependencies
         script: |
           npm install
+
       - name: Prebuild iOS
         script: |
           npx expo prebuild --platform ios --clean
+
       - name: Install pods
         script: |
           cd ios
           pod install
+
+      - name: Create export options
+        script: |
+          cat > /Users/builder/export_options.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store</string>
+            <key>uploadBitcode</key>
+            <false/>
+            <key>uploadSymbols</key>
+            <true/>
+          </dict>
+          </plist>
+          EOF
+
       - name: Build iOS
         script: |
           xcode-project build-ipa \
             --workspace ios/*.xcworkspace \
-            --scheme MisHuchas
+            --scheme MisHuchas \
+            --export-options-plist /Users/builder/export_options.plist
+
     artifacts:
       - build/ios/ipa/*.ipa

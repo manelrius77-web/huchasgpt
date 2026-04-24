@@ -525,7 +525,7 @@ const styles = StyleSheet.create({
     paddingVertical: 62,
     paddingHorizontal: 75,
     borderRadius: 16,
-    borderWidth: 3,
+    borderWidth: 6,
     borderColor: '#d30d1e',
     alignItems: 'center',
     fontSize: 45,

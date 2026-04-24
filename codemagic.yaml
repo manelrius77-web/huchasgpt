@@ -57,8 +57,8 @@ workflows:
             <string>manual</string>
             <key>provisioningProfiles</key>
             <dict>
-              <key>com.manelrius.mishuchas</key>
-              <string>[expo] com.manelrius.mishuchas AppStore 2026-04-23T22:47:42.109Z</string>
+              <key>com.manelrius.huchas</key>
+              <string>[expo] com.manelrius.huchas AppStore 2026-04-23T22:47:42.109Z</string>
             </dict>
             <key>teamID</key>
             <string>W27J7P3Z8R</string>

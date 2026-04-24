@@ -30,7 +30,7 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.manelrius.mishuchas
         provisioning_profiles:
-          - mishuchasios
+          - huchas_distribucion
 
     scripts:
       - name: Install dependencies

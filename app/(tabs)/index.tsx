@@ -3,7 +3,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   FlatList,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -217,6 +219,113 @@ export default function HomeScreen() {
     );
   }
 
+  function renderCreateModal() {
+    return (
+      <Modal visible={showCreateModal} transparent animationType="slide">
+        <KeyboardAvoidingView
+          style={styles.modalOverlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>Nueva hucha</Text>
+
+            <Text style={styles.inputLabel}>Nombre</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ej: Viaje, coche, regalo..."
+              value={newNombre}
+              onChangeText={setNewNombre}
+            />
+
+            <Text style={styles.inputLabel}>Meta</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ej: 500"
+              keyboardType="decimal-pad"
+              value={newMeta}
+              onChangeText={setNewMeta}
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => {
+                  resetCreateForm();
+                  setShowCreateModal(false);
+                }}
+              >
+                <Text style={styles.buttonText}>Cancelar</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalButton, styles.primaryButton]}
+                onPress={crearHucha}
+              >
+                <Text style={styles.buttonText}>Crear</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+    );
+  }
+
+  function renderMoveModal() {
+    return (
+      <Modal visible={showMoveModal} transparent animationType="slide">
+        <KeyboardAvoidingView
+          style={styles.modalOverlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>
+              {moveTipo === 'ingreso' ? 'Añadir dinero' : 'Retirar dinero'}
+            </Text>
+
+            <Text style={styles.inputLabel}>Cantidad</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ej: 20"
+              keyboardType="decimal-pad"
+              value={moveCantidad}
+              onChangeText={setMoveCantidad}
+            />
+
+            <Text style={styles.inputLabel}>Descripción</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Opcional"
+              value={moveDescripcion}
+              onChangeText={setMoveDescripcion}
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => {
+                  resetMoveForm();
+                  setShowMoveModal(false);
+                }}
+              >
+                <Text style={styles.buttonText}>Cancelar</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.modalButton,
+                  moveTipo === 'ingreso' ? styles.primaryButton : styles.warningButton,
+                ]}
+                onPress={guardarMovimiento}
+              >
+                <Text style={styles.buttonText}>Confirmar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+    );
+  }
+
   if (selectedHucha) {
     const saldo = getSaldoHucha(selectedHucha.id);
     const porcentaje = getPorcentajeHucha(selectedHucha);
@@ -229,67 +338,79 @@ export default function HomeScreen() {
             style={styles.backButton}
             onPress={() => setSelectedHuchaId(null)}
           >
-            <Text style={styles.buttonText}>← VOLVER</Text>
+            <Text style={styles.backText}>← Volver</Text>
           </TouchableOpacity>
 
-          <Text style={styles.title}>{selectedHucha.nombre.toUpperCase()}</Text>
+          <Text style={styles.title}>{selectedHucha.nombre}</Text>
 
-          <View style={styles.card}>
-            <Text style={styles.label}>SALDO ACTUAL</Text>
+          <View style={styles.mainCard}>
+            <Text style={styles.label}>Saldo actual</Text>
             <Text style={styles.amount}>€{saldo.toFixed(2)}</Text>
 
-            <Text style={[styles.label, { marginTop: 16 }]}>META</Text>
-            <Text style={styles.metaText}>€{selectedHucha.meta.toFixed(2)}</Text>
+            <View style={styles.metaRow}>
+              <Text style={styles.metaText}>Meta: €{selectedHucha.meta.toFixed(2)}</Text>
+              <Text style={styles.progressText}>{porcentaje.toFixed(0)}%</Text>
+            </View>
 
             <View style={styles.progressBarBg}>
               <View style={[styles.progressBarFill, { width: `${porcentaje}%` }]} />
             </View>
-
-            <Text style={styles.progressText}>{porcentaje.toFixed(0)}% completado</Text>
           </View>
 
-          <View style={styles.row}>
+          <View style={styles.actionRow}>
             <TouchableOpacity
-              style={[styles.actionButton, styles.greenButton]}
+              style={[styles.bigButton, styles.primaryButton]}
               onPress={() => abrirModalMovimiento('ingreso')}
             >
-              <Text style={styles.buttonText}>+ AÑADIR</Text>
+              <Text style={styles.buttonText}>+ Añadir</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.actionButton, styles.redButton]}
+              style={[styles.bigButton, styles.warningButton]}
               onPress={() => abrirModalMovimiento('retirada')}
             >
-              <Text style={styles.buttonText}>- RETIRAR</Text>
+              <Text style={styles.buttonText}>- Retirar</Text>
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity
-            style={[styles.actionButton, styles.deleteButton, { marginTop: 12 }]}
-            onPress={() => confirmarEliminarHucha(selectedHucha.id)}
-          >
-            <Text style={styles.buttonText}>ELIMINAR HUCHA</Text>
-          </TouchableOpacity>
-
-          <Text style={[styles.sectionTitle, { marginTop: 24, marginBottom: 12 }]}>
-            HISTORIAL
-          </Text>
+          <View style={styles.historyHeader}>
+            <Text style={styles.sectionTitle}>Historial</Text>
+            <TouchableOpacity
+              style={styles.deleteSmallButton}
+              onPress={() => confirmarEliminarHucha(selectedHucha.id)}
+            >
+              <Text style={styles.deleteSmallText}>Eliminar</Text>
+            </TouchableOpacity>
+          </View>
 
           <FlatList
             data={movimientos}
             keyExtractor={(item) => item.id}
-            ListEmptyComponent={<Text style={styles.emptyText}>No hay movimientos todavía</Text>}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.listContent}
+            ListEmptyComponent={
+              <Text style={styles.emptyText}>Aún no hay movimientos.</Text>
+            }
             renderItem={({ item }) => (
               <View style={styles.movementCard}>
-                <Text style={styles.movementType}>
-                  {item.tipo === 'ingreso' ? 'INGRESO' : 'RETIRADA'}
-                </Text>
-                <Text style={styles.movementAmount}>
-                  {item.tipo === 'ingreso' ? '+' : '-'}€{Number(item.cantidad).toFixed(2)}
-                </Text>
+                <View style={styles.movementTop}>
+                  <Text style={styles.movementType}>
+                    {item.tipo === 'ingreso' ? 'Ingreso' : 'Retirada'}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.movementAmount,
+                      item.tipo === 'ingreso' ? styles.positiveText : styles.negativeText,
+                    ]}
+                  >
+                    {item.tipo === 'ingreso' ? '+' : '-'}€{Number(item.cantidad).toFixed(2)}
+                  </Text>
+                </View>
+
                 <Text style={styles.movementDesc}>
                   {item.descripcion || 'Sin descripción'}
                 </Text>
+
                 <Text style={styles.movementDate}>
                   {new Date(item.fecha).toLocaleString()}
                 </Text>
@@ -298,46 +419,7 @@ export default function HomeScreen() {
           />
         </View>
 
-        <Modal visible={showMoveModal} transparent animationType="slide">
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalBox}>
-              <Text style={styles.modalTitle}>
-                {moveTipo === 'ingreso' ? 'AÑADIR DINERO' : 'RETIRAR DINERO'}
-              </Text>
-
-              <TextInput
-                style={styles.input}
-                placeholder="Cantidad"
-                keyboardType="decimal-pad"
-                value={moveCantidad}
-                onChangeText={setMoveCantidad}
-              />
-
-              <TextInput
-                style={styles.input}
-                placeholder="Descripción opcional"
-                value={moveDescripcion}
-                onChangeText={setMoveDescripcion}
-              />
-
-              <View style={styles.row}>
-                <TouchableOpacity
-                  style={[styles.actionButton, styles.redButton]}
-                  onPress={() => setShowMoveModal(false)}
-                >
-                  <Text style={styles.buttonText}>CANCELAR</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[styles.actionButton, styles.greenButton]}
-                  onPress={guardarMovimiento}
-                >
-                  <Text style={styles.buttonText}>CONFIRMAR</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
+        {renderMoveModal()}
       </SafeAreaView>
     );
   }
@@ -345,86 +427,67 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.header}>MIS HUCHAS</Text>
+        <Text style={styles.header}>Mis huchas</Text>
 
-        <View style={styles.card}>
-          <Text style={styles.label}>TOTAL AHORRADO</Text>
+        <View style={styles.mainCard}>
+          <Text style={styles.label}>Total ahorrado</Text>
           <Text style={styles.amount}>€{totalAhorrado.toFixed(2)}</Text>
         </View>
 
-        <View style={styles.rowBetween}>
-          <Text style={styles.sectionTitle}>TUS HUCHAS ({data.huchas.length})</Text>
-          <TouchableOpacity
-            style={[styles.smallButton, styles.greenButton]}
-            onPress={() => setShowCreateModal(true)}
-          >
-            <Text style={styles.buttonText}>+ NUEVA</Text>
-          </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.newHuchaButton, styles.primaryButton]}
+          onPress={() => setShowCreateModal(true)}
+        >
+          <Text style={styles.newHuchaText}>+ Crear nueva hucha</Text>
+        </TouchableOpacity>
+
+        <View style={styles.listHeader}>
+          <Text style={styles.sectionTitle}>Tus huchas</Text>
+          <Text style={styles.counterText}>{data.huchas.length}</Text>
         </View>
 
         <FlatList
           data={data.huchas}
           keyExtractor={(item) => item.id}
-          ListEmptyComponent={<Text style={styles.emptyText}>No hay huchas todavía</Text>}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listContent}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>
+              No hay huchas todavía. Crea la primera.
+            </Text>
+          }
           renderItem={({ item }) => {
             const saldo = getSaldoHucha(item.id);
             const porcentaje = getPorcentajeHucha(item);
 
             return (
-              <TouchableOpacity style={styles.card} onPress={() => setSelectedHuchaId(item.id)}>
-                <Text style={styles.huchaTitle}>{item.nombre.toUpperCase()}</Text>
-                <Text style={styles.amount}>€{saldo.toFixed(2)}</Text>
-                <Text style={styles.metaText}>Meta: €{item.meta.toFixed(2)}</Text>
+              <TouchableOpacity
+                style={styles.huchaCard}
+                onPress={() => setSelectedHuchaId(item.id)}
+                activeOpacity={0.85}
+              >
+                <View style={styles.huchaTop}>
+                  <Text style={styles.huchaTitle}>{item.nombre}</Text>
+                  <Text style={styles.chevron}>›</Text>
+                </View>
+
+                <Text style={styles.cardAmount}>€{saldo.toFixed(2)}</Text>
+
+                <View style={styles.metaRow}>
+                  <Text style={styles.metaText}>Meta: €{item.meta.toFixed(2)}</Text>
+                  <Text style={styles.progressText}>{porcentaje.toFixed(0)}%</Text>
+                </View>
 
                 <View style={styles.progressBarBg}>
                   <View style={[styles.progressBarFill, { width: `${porcentaje}%` }]} />
                 </View>
-
-                <Text style={styles.progressText}>{porcentaje.toFixed(0)}% completado</Text>
               </TouchableOpacity>
             );
           }}
         />
       </View>
 
-      <Modal visible={showCreateModal} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalBox}>
-            <Text style={styles.modalTitle}>NUEVA HUCHA</Text>
-
-            <TextInput
-              style={styles.input}
-              placeholder="Nombre de la hucha"
-              value={newNombre}
-              onChangeText={setNewNombre}
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Meta"
-              keyboardType="decimal-pad"
-              value={newMeta}
-              onChangeText={setNewMeta}
-            />
-
-            <View style={styles.row}>
-              <TouchableOpacity
-                style={[styles.actionButton, styles.redButton]}
-                onPress={() => setShowCreateModal(false)}
-              >
-                <Text style={styles.buttonText}>CANCELAR</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.actionButton, styles.greenButton]}
-                onPress={crearHucha}
-              >
-                <Text style={styles.buttonText}>CREAR</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      {renderCreateModal()}
     </SafeAreaView>
   );
 }
@@ -432,194 +495,341 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0eef3',
+    backgroundColor: '#F3F1F7',
   },
+
   content: {
     flex: 1,
-    padding: 20,
+    paddingHorizontal: 18,
+    paddingTop: 10,
+    paddingBottom: 18,
   },
+
   header: {
-    fontSize: 34,
+    fontSize: 32,
     fontWeight: '900',
-    color: '#1805a6',
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 34,
-    fontWeight: '900',
-    color: '#111',
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '900',
-    color: '#111',
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderWidth: 3,
-    borderColor: '#111',
-    borderRadius: 20,
-    padding: 18,
+    color: '#1805A6',
     marginBottom: 16,
   },
-  label: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: '#222',
-    marginBottom: 6,
-  },
-  amount: {
-    fontSize: 28,
+
+  title: {
+    fontSize: 30,
     fontWeight: '900',
     color: '#111',
+    marginBottom: 16,
   },
-  metaText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#111',
-    marginTop: 6,
-  },
-  progressBarBg: {
-    width: '100%',
-    height: 14,
-    backgroundColor: '#e5e5e5',
-    borderRadius: 10,
-    marginTop: 14,
-    overflow: 'hidden',
+
+  mainCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 16,
     borderWidth: 2,
     borderColor: '#111',
   },
+
+  label: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#555',
+    marginBottom: 6,
+  },
+
+  amount: {
+    fontSize: 42,
+    fontWeight: '900',
+    color: '#111',
+  },
+
+  cardAmount: {
+    fontSize: 30,
+    fontWeight: '900',
+    color: '#111',
+    marginTop: 6,
+  },
+
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: '#111',
+  },
+
+  newHuchaButton: {
+    minHeight: 58,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: '#111',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+
+  newHuchaText: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#111',
+  },
+
+  primaryButton: {
+    backgroundColor: '#DDF46A',
+  },
+
+  warningButton: {
+    backgroundColor: '#F3C7C0',
+  },
+
+  cancelButton: {
+    backgroundColor: '#EDEAF2',
+  },
+
+  actionRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 22,
+  },
+
+  bigButton: {
+    flex: 1,
+    minHeight: 60,
+    borderRadius: 18,
+    borderWidth: 2,
+    borderColor: '#111',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  buttonText: {
+    fontSize: 17,
+    fontWeight: '900',
+    color: '#111',
+  },
+
+  backButton: {
+    alignSelf: 'flex-start',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: '#111',
+    backgroundColor: '#BFE7D3',
+    marginBottom: 14,
+  },
+
+  backText: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#111',
+  },
+
+  listHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+
+  counterText: {
+    marginLeft: 8,
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#1805A6',
+  },
+
+  listContent: {
+    paddingBottom: 24,
+  },
+
+  huchaCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    padding: 18,
+    marginBottom: 14,
+    borderWidth: 2,
+    borderColor: '#111',
+  },
+
+  huchaTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  huchaTitle: {
+    flex: 1,
+    fontSize: 23,
+    fontWeight: '900',
+    color: '#111',
+  },
+
+  chevron: {
+    fontSize: 34,
+    fontWeight: '700',
+    color: '#111',
+    marginLeft: 10,
+  },
+
+  metaRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 12,
+  },
+
+  metaText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#333',
+  },
+
+  progressText: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#111',
+  },
+
+  progressBarBg: {
+    width: '100%',
+    height: 14,
+    backgroundColor: '#E8E8E8',
+    borderRadius: 20,
+    marginTop: 10,
+    overflow: 'hidden',
+    borderWidth: 1.5,
+    borderColor: '#111',
+  },
+
   progressBarFill: {
     height: '100%',
     backgroundColor: '#111',
   },
-  progressText: {
-    marginTop: 8,
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#333',
-  },
-  row: {
+
+  historyHeader: {
     flexDirection: 'row',
-    gap: 12,
-  },
-  rowBetween: {
-    flexDirection: 'column',
     justifyContent: 'space-between',
-    alignItems: 'stretch',
-    marginBottom: 14,
-  },
-  actionButton: {
-    flex: 5,
-    paddingVertical: 25,
-    borderRadius: 16,
-    borderWidth: 3,
-    
-    borderColor: '#087985',
     alignItems: 'center',
+    marginBottom: 12,
   },
-  smallButton: {
-    alignSelf: 'center',
-    minWidth: 480,
-    paddingVertical: 62,
-    paddingHorizontal: 75,
-    borderRadius: 16,
-    borderWidth: 6,
-    borderColor: '#d30d1e',
-    alignItems: 'center',
-    fontSize: 45,
+
+  deleteSmallButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: '#111',
+    backgroundColor: '#E8A8A8',
   },
-  greenButton: {
-    backgroundColor: '#dbf269',
-  },
-  redButton: {
-    backgroundColor: '#f3c7c0',
-  },
-  deleteButton: {
-    backgroundColor: '#e8a8a8',
-  },
-  buttonText: {
-    fontSize: 18,
+
+  deleteSmallText: {
+    fontSize: 14,
     fontWeight: '900',
     color: '#111',
   },
+
+  movementCard: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: '#111',
+    borderRadius: 18,
+    padding: 15,
+    marginBottom: 12,
+  },
+
+  movementTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  movementType: {
+    fontSize: 15,
+    fontWeight: '900',
+    color: '#111',
+  },
+
+  movementAmount: {
+    fontSize: 22,
+    fontWeight: '900',
+  },
+
+  positiveText: {
+    color: '#126B35',
+  },
+
+  negativeText: {
+    color: '#A32020',
+  },
+
+  movementDesc: {
+    fontSize: 16,
+    color: '#333',
+    marginTop: 6,
+  },
+
+  movementDate: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 6,
+  },
+
   emptyText: {
     fontSize: 16,
-    color: '#444',
+    color: '#555',
     marginTop: 12,
+    lineHeight: 22,
   },
-  huchaTitle: {
-    fontSize: 24,
-    fontWeight: '900',
-    color: '#111',
-    marginBottom: 10,
-  },
-  backButton: {
-    alignSelf: 'flex-start',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 16,
-    borderWidth: 3,
-    borderColor: '#111',
-    backgroundColor: '#bfe7d3',
-    marginBottom: 18,
-  },
+
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.35)',
     justifyContent: 'center',
     padding: 20,
   },
+
   modalBox: {
-    backgroundColor: '#fff',
-    borderWidth: 3,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
     borderColor: '#111',
-    borderRadius: 20,
+    borderRadius: 24,
     padding: 20,
   },
+
   modalTitle: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: '900',
-    marginBottom: 20,
+    marginBottom: 18,
     color: '#111',
   },
-  input: {
-    borderWidth: 3,
-    borderColor: '#111',
-    borderRadius: 14,
-    padding: 14,
-    fontSize: 18,
-    marginBottom: 14,
-    backgroundColor: '#fafafa',
+
+  inputLabel: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#333',
+    marginBottom: 6,
   },
-  movementCard: {
-    backgroundColor: '#fff',
+
+  input: {
     borderWidth: 2,
     borderColor: '#111',
     borderRadius: 16,
-    padding: 14,
-    marginBottom: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    fontSize: 18,
+    marginBottom: 14,
+    backgroundColor: '#FAFAFA',
   },
-  movementType: {
-    fontSize: 14,
-    fontWeight: '900',
-    color: '#111',
-  },
-  movementAmount: {
-    fontSize: 22,
-    fontWeight: '900',
-    color: '#111',
-    marginTop: 4,
-  },
-  movementDesc: {
-    fontSize: 16,
-    color: '#333',
+
+  modalButtons: {
+    flexDirection: 'row',
+    gap: 12,
     marginTop: 6,
   },
-  movementDate: {
-    fontSize: 12,
-    color: '#555',
-    marginTop: 6,
+
+  modalButton: {
+    flex: 1,
+    minHeight: 54,
+    borderRadius: 17,
+    borderWidth: 2,
+    borderColor: '#111',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

@@ -72,8 +72,7 @@ workflows:
 
       - name: Set up code signing
         script: |
-          xcode-project use-profiles
-
+          xcode-project use-profiles --project ios/MisHuchas.xcodeproj
       - name: Build iOS
         script: |
           xcode-project build-ipa \

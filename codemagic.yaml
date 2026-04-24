@@ -2,23 +2,43 @@ workflows:
   expo-web-build:
     name: MisHuchas Web Check
     max_build_duration: 30
-    instance_type: mac_mini_m1
-
-    environment:
-      node: 20
-
+    instance_type: mac_mini_m2
     scripts:
       - name: Install dependencies
         script: |
           npm install
-
       - name: Check project
         script: |
-          npx expo-doctor || true
-
+          npm run lint || true
       - name: Export web build
         script: |
           npx expo export --platform web
-
     artifacts:
       - dist/**
+
+  expo-ios-build:
+    name: MisHuchas iOS TestFlight
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      node: 20
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm install
+      - name: Prebuild iOS
+        script: |
+          npx expo prebuild --platform ios --clean
+      - name: Install pods
+        script: |
+          cd ios
+          pod install
+      - name: Build iOS
+        script: |
+          xcode-project build-ipa \
+            --workspace ios/*.xcworkspace \
+            --scheme MisHuchas
+    artifacts:
+      - build/ios/ipa/*.ipa

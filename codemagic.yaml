@@ -27,7 +27,6 @@ workflows:
       xcode: latest
       cocoapods: default
       ios_signing:
-        
         provisioning_profiles:
           - huchas_distribucion
 
@@ -54,6 +53,15 @@ workflows:
           <dict>
             <key>method</key>
             <string>app-store</string>
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>com.manelrius.mishuchas</key>
+              <string>huchas_distribucion</string>
+            </dict>
+            <key>teamID</key>
+            <string>W27J7P3Z8R</string>
             <key>uploadBitcode</key>
             <false/>
             <key>uploadSymbols</key>
@@ -68,10 +76,23 @@ workflows:
 
       - name: Build iOS
         script: |
-          xcode-project build-ipa \
-            --workspace ios/*.xcworkspace \
-            --scheme MisHuchas \
-            --export-options-plist /Users/builder/export_options.plist
+          xcodebuild \
+            -workspace ios/MisHuchas.xcworkspace \
+            -scheme MisHuchas \
+            -configuration Release \
+            -archivePath build/ios/xcarchive/MisHuchas.xcarchive \
+            archive \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM=W27J7P3Z8R \
+            PRODUCT_BUNDLE_IDENTIFIER=com.manelrius.mishuchas \
+            PROVISIONING_PROFILE_SPECIFIER=huchas_distribucion
+
+          xcodebuild \
+            -exportArchive \
+            -archivePath build/ios/xcarchive/MisHuchas.xcarchive \
+            -exportPath build/ios/ipa \
+            -exportOptionsPlist /Users/builder/export_options.plist
 
     artifacts:
       - build/ios/ipa/*.ipa

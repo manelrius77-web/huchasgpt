@@ -28,7 +28,6 @@ workflows:
       cocoapods: default
       ios_signing:
         
-        bundle_identifier: com.manelrius.mishuchas
         provisioning_profiles:
           - huchas_distribucion
 

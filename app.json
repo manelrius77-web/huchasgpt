@@ -2,7 +2,7 @@
   "expo": {
     "name": "Mis Huchas",
     "slug": "mis-huchas",
-    "version": "1.0.0",
+    "version": "1.3.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "mishuchas",
@@ -11,6 +11,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.manelrius.mishuchas",
+      "buildNumber": "13",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }

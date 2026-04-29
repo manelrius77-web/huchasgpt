@@ -82,6 +82,7 @@ export default function HomeScreen() {
   async function persistData(newData: AppData) {
     try {
       setData(newData);
+
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newData));
     } catch (error) {
       console.error('Error guardando datos', error);
@@ -133,13 +134,14 @@ export default function HomeScreen() {
       return;
     }
 
-    if (Number.isNaN(meta) || meta <= 0) {
+    if (Number.isNaN(meta) || meta >0) {
       Alert.alert('Error', 'La meta debe ser mayor que 0');
       return;
     }
 
     const nuevaHucha: Hucha = {
       id: generateId(),
+      
       nombre: newNombre.trim(),
       meta,
       createdAt: new Date().toISOString(),
@@ -197,27 +199,32 @@ export default function HomeScreen() {
     resetMoveForm();
   }
 
-  function confirmarEliminarHucha(huchaId: string) {
-    Alert.alert(
-      'Eliminar hucha',
-      'También se borrará su historial. ¿Seguro?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Eliminar',
-          style: 'destructive',
-          onPress: async () => {
-            const newData: AppData = {
-              huchas: data.huchas.filter((h) => h.id !== huchaId),
-              movimientos: data.movimientos.filter((m) => m.huchaId !== huchaId),
-            };
-            setSelectedHuchaId(null);
-            await persistData(newData);
-          },
+function confirmarEliminarHucha(huchaId: string) {
+  console.log('Eliminar pulsado:', huchaId);
+
+  Alert.alert(
+    'Eliminar hucha',
+    'También se borrará su historial. ¿Seguro?',
+    [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Eliminar',
+        style: 'destructive',
+        onPress: async () => {
+          console.log('Confirmado eliminar:', huchaId);
+
+          const newData: AppData = {
+            huchas: data.huchas.filter((h) => h.id !== huchaId),
+            movimientos: data.movimientos.filter((m) => m.huchaId !== huchaId),
+          };
+
+          setSelectedHuchaId(null);
+          await persistData(newData);
         },
-      ]
-    );
-  }
+      },
+    ]
+  );
+}
 
   function renderCreateModal() {
     return (
@@ -232,9 +239,9 @@ export default function HomeScreen() {
             <Text style={styles.inputLabel}>Nombre</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ej: Viaje, coche, regalo..."
+              placeholder="Ej: VIAJE, VACACIONES, REGAlO..."
               value={newNombre}
-              onChangeText={setNewNombre}
+             onChangeText={setNewNombre}
             />
 
             <Text style={styles.inputLabel}>Meta</Text>
@@ -387,7 +394,7 @@ export default function HomeScreen() {
             data={movimientos}
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.listContent}
+            contentContainerStyle={styles.huchasListContent}
             ListEmptyComponent={
               <Text style={styles.emptyText}>Aún no hay movimientos.</Text>
             }
@@ -427,7 +434,7 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.header}>Mis huchas</Text>
+        <Text style={styles.header}>Mis Huchas</Text>
 
         <View style={styles.mainCard}>
           <Text style={styles.label}>Total ahorrado</Text>
@@ -502,14 +509,15 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 18,
     paddingTop: 10,
-    paddingBottom: 18,
+    paddingBottom: 16,
   },
 
   header: {
-    fontSize: 32,
+    fontSize: 25,
     fontWeight: '900',
-    color: '#1805A6',
+    color: '#ed0b16',
     marginBottom: 16,
+    textAlign: 'center',
   },
 
   title: {
@@ -521,35 +529,38 @@ const styles = StyleSheet.create({
 
   mainCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    padding: 20,
+    borderRadius: 12,
+    padding: 10,
     marginBottom: 16,
-    borderWidth: 2,
+    borderWidth: 4,
     borderColor: '#111',
   },
 
   label: {
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: '800',
-    color: '#555',
+    color: '#0b0101',
     marginBottom: 6,
   },
 
   amount: {
-    fontSize: 42,
-    fontWeight: '900',
+    fontSize: 18,
+    fontWeight: '600',
     color: '#111',
+    fontStyle: 'italic',
   },
 
   cardAmount: {
-    fontSize: 30,
-    fontWeight: '900',
+    fontSize: 12,
+    fontWeight: '600',
     color: '#111',
     marginTop: 6,
+    paddingVertical: 2,
+    paddingHorizontal: 10,
   },
 
   sectionTitle: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: '900',
     color: '#111',
   },
@@ -565,13 +576,13 @@ const styles = StyleSheet.create({
   },
 
   newHuchaText: {
-    fontSize: 18,
-    fontWeight: '900',
+    fontSize: 22,
+    fontWeight: '500',
     color: '#111',
   },
 
   primaryButton: {
-    backgroundColor: '#DDF46A',
+    backgroundColor: '#dbe03b',
   },
 
   warningButton: {
@@ -630,8 +641,8 @@ const styles = StyleSheet.create({
   counterText: {
     marginLeft: 8,
     fontSize: 18,
-    fontWeight: '900',
-    color: '#1805A6',
+    fontWeight: '500',
+    color: '#2fc11c',
   },
 
   listContent: {
@@ -639,12 +650,13 @@ const styles = StyleSheet.create({
   },
 
   huchaCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 22,
-    padding: 18,
-    marginBottom: 14,
+    backgroundColor: '#e2dbdb',
+    borderRadius: 14,
+    marginBottom: 8,
     borderWidth: 2,
     borderColor: '#111',
+    paddingVertical:2,
+    paddingHorizontal:12,
   },
 
   huchaTop: {
@@ -655,51 +667,54 @@ const styles = StyleSheet.create({
 
   huchaTitle: {
     flex: 1,
-    fontSize: 23,
+    fontSize: 21,
     fontWeight: '900',
-    color: '#111',
+    color: '#0c0707',
+    marginBottom: 4,
+    
   },
 
   chevron: {
-    fontSize: 34,
-    fontWeight: '700',
-    color: '#111',
+    fontSize: 10,
+    fontWeight: '300',
+    color: '#160202',
     marginLeft: 10,
+    marginBottom: 2,
   },
 
   metaRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 12,
+    marginTop: 4,
   },
 
   metaText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#333',
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#3d17a6',
   },
 
   progressText: {
-    fontSize: 16,
+    fontSize: 10,
     fontWeight: '900',
-    color: '#111',
+    color: '#1b02dc',
   },
 
   progressBarBg: {
     width: '100%',
-    height: 14,
+    height: 10,
     backgroundColor: '#E8E8E8',
     borderRadius: 20,
-    marginTop: 10,
+    marginTop: 4,
     overflow: 'hidden',
     borderWidth: 1.5,
-    borderColor: '#111',
+    borderColor: '#000107',
   },
 
   progressBarFill: {
     height: '100%',
-    backgroundColor: '#111',
+    backgroundColor: '#e240cc',
   },
 
   historyHeader: {
@@ -715,7 +730,12 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 2,
     borderColor: '#111',
-    backgroundColor: '#E8A8A8',
+    backgroundColor: '#ada0e3',
+    width: 190,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    //textAlign: 'center',
   },
 
   deleteSmallText: {
@@ -728,9 +748,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderWidth: 2,
     borderColor: '#111',
-    borderRadius: 18,
-    padding: 15,
-    marginBottom: 12,
+    borderRadius: 12,
+    padding: 5,
+    marginBottom: 5,
   },
 
   movementTop: {
@@ -740,14 +760,15 @@ const styles = StyleSheet.create({
   },
 
   movementType: {
-    fontSize: 15,
+    fontSize: 12,
     fontWeight: '900',
     color: '#111',
   },
 
   movementAmount: {
-    fontSize: 22,
-    fontWeight: '900',
+    fontSize: 12,
+    fontWeight: '600',
+    
   },
 
   positiveText: {
@@ -761,13 +782,13 @@ const styles = StyleSheet.create({
   movementDesc: {
     fontSize: 16,
     color: '#333',
-    marginTop: 6,
+    marginTop: 2,
   },
 
   movementDate: {
     fontSize: 12,
     color: '#666',
-    marginTop: 6,
+    marginTop: 2,
   },
 
   emptyText: {
@@ -794,9 +815,9 @@ const styles = StyleSheet.create({
 
   modalTitle: {
     fontSize: 26,
-    fontWeight: '900',
+    fontWeight: '300',
     marginBottom: 18,
-    color: '#111',
+    color: '#932d2d',
   },
 
   inputLabel: {
@@ -831,5 +852,9 @@ const styles = StyleSheet.create({
     borderColor: '#111',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  huchasListContent: {
+    paddingBottom: 12,
+    paddingVertical: 4,
   },
 });
